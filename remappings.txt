@@ -1,0 +1,2 @@
+@limitbreak/tokenmaster/=lib/tm-tokenmaster/
+@limitbreak/tm-core-lib/=lib/tm-tokenmaster/lib/tm-core-lib/

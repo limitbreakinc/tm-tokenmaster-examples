@@ -3,4 +3,20 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+solc_version = "0.8.24"
+evm_version = "cancun"
+
+optimizer = true
+optimizer_runs = 999_999_999
+
+# Ignore - SPDX, Transient, Init Code Size, Selfdestruct, Deployed Code Size
+ignored_error_codes = [1878, 2394, 3860, 5159, 5574] 
+
+[fuzz]
+runs = 200
+max_test_rejects = 2560000
+
+[invariant]
+runs = 200
+depth = 500
+fail_on_revert = false
