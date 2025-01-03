@@ -117,11 +117,10 @@ TokenMaster contracts are deployed at the following addresses across EVM-compati
 
 | Contract                              | Address                                      |
 | ------------------------------------- | -------------------------------------------- |
-| **TokenMaster Router**                | `0x1234567890123456789012345678901234567890` |
-| **TokenMaster Factory Configuration** | `0x1234567890123456789012345678901234567890` |
-| **Standard Pool Factory**             | `0x1234567890123456789012345678901234567890` |
-| **Stable Pool Factory**               | `0x1234567890123456789012345678901234567890` |
-| **Promotional Pool Factory**          | `0x1234567890123456789012345678901234567890` |
+| **TokenMaster Router**                | `0x0E00009d00d1000069ed00A908e00081F5006008` |
+| **Standard Pool Factory**             | `0x0000008fA9E16d40F879402FB580bAc7bdFA7d7e` |
+| **Stable Pool Factory**               | `0x0000001bdD41D6eec104FA70DB06cA0869c96A46` |
+| **Promotional Pool Factory**          | `0x000000B3F05aC48e679d211B2892BC08F02150C9` |
 
 ### Deploying the Infrastructure
 
