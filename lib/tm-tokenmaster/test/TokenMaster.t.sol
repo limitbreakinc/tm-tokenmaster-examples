@@ -37,8 +37,6 @@ contract TokenMasterTest is Test {
 
         vm.startPrank(TOKENMASTER_ADMIN);
         roleSet = roleServer.createRoleSet(TOKENMASTER_ROLE_SERVER_SET_SALT);
-        console.log("Role Set:");
-        console.logBytes32(roleSet);
         vm.stopPrank();
 
         trustedForwarderTemplate = new TrustedForwarder();
@@ -48,11 +46,13 @@ contract TokenMasterTest is Test {
         vm.etch(TRUSTED_FORWARDER_FACTORY_ADDRESS, address(trustedForwarderFactoryTemplate).code);
         trustedForwarderFactory = TrustedForwarderFactory(TRUSTED_FORWARDER_FACTORY_ADDRESS);
 
-        transferValidator = new CreatorTokenTransferValidator(TRANSFER_VALIDATOR_ADMIN, address(1), "TransferValidator", "4.0");
+        CreatorTokenTransferValidator tmpTransferValidator = new CreatorTokenTransferValidator(TRANSFER_VALIDATOR_ADMIN, address(1), "TransferValidator", "4.0");
+        vm.etch(TRANSFER_VALIDATOR_ADDRESS, address(tmpTransferValidator).code);
+        transferValidator = CreatorTokenTransferValidator(TRANSFER_VALIDATOR_ADDRESS);
+        vm.store(TRANSFER_VALIDATOR_ADDRESS, keccak256(abi.encode(0, 10)), bytes32(uint256(uint160(TRANSFER_VALIDATOR_ADMIN))));
         transferValidator.registerAdditionalDataHash(PERMITC_ADVANCED_TYPEHASH_TO_REGISTER);
         
-
-        address expectedRouterAddress = _computeRouterAddress();
+        address expectedRouterAddress = TOKENMASTER_ROUTER_ADDRESS;
 
         IRoleClient[] memory clients = new IRoleClient[](0);
         vm.startPrank(TOKENMASTER_ADMIN);
@@ -62,35 +62,31 @@ contract TokenMasterTest is Test {
         vm.stopPrank();
 
         vm.startPrank(KEYLESS_DEPLOYER);
-        tokenMasterRouter = new TokenMasterRouter{salt: ROUTER_SALT}(
+        TokenMasterRouter tmpTokenMasterRouter = new TokenMasterRouter(
             address(roleServer),
             roleSet,
             address(trustedForwarderFactory)
         );
-        console.log("TokenMasterRouter: %s", address(expectedRouterAddress));
+        vm.etch(TOKENMASTER_ROUTER_ADDRESS, address(tmpTokenMasterRouter).code);
+        tokenMasterRouter = TokenMasterRouter(TOKENMASTER_ROUTER_ADDRESS);
+        console.log("TokenMasterRouter: %s", address(tokenMasterRouter));
         vm.stopPrank();
 
         address[] memory initialAllowedFactories = new address[](3);
-        initialAllowedFactories[0] = _computeFactoryAddress(
-            type(StandardPoolFactory).creationCode,
-            address(expectedRouterAddress),
-            STANDARD_POOL_SALT
-        );
-        initialAllowedFactories[1] = _computeFactoryAddress(
-            type(StablePoolFactory).creationCode,
-            address(expectedRouterAddress),
-            STABLE_POOL_SALT
-        );
-        initialAllowedFactories[2] = _computeFactoryAddress(
-            type(PromotionalPoolFactory).creationCode,
-            address(expectedRouterAddress),
-            PROMOTIONAL_POOL_SALT
-        );
+        initialAllowedFactories[0] = STANDARD_POOL_ADDRESS;
+        initialAllowedFactories[1] = STABLE_POOL_ADDRESS;
+        initialAllowedFactories[2] = PROMO_POOL_ADDRESS;
 
         vm.startPrank(KEYLESS_DEPLOYER);
-        standardPoolFactory = new StandardPoolFactory{salt: STANDARD_POOL_SALT}(address(tokenMasterRouter));
-        stablePoolFactory = new StablePoolFactory{salt: STABLE_POOL_SALT}(address(tokenMasterRouter));
-        promotionalPoolFactory = new PromotionalPoolFactory{salt: PROMOTIONAL_POOL_SALT}(address(tokenMasterRouter));
+        StandardPoolFactory tmpStandardPoolFactory = new StandardPoolFactory{salt: STANDARD_POOL_SALT}(address(tokenMasterRouter));
+        vm.etch(STANDARD_POOL_ADDRESS, address(tmpStandardPoolFactory).code);
+        standardPoolFactory = StandardPoolFactory(STANDARD_POOL_ADDRESS);
+        StablePoolFactory tmpStablePoolFactory = new StablePoolFactory{salt: STABLE_POOL_SALT}(address(tokenMasterRouter));
+        vm.etch(STABLE_POOL_ADDRESS, address(tmpStablePoolFactory).code);
+        stablePoolFactory = StablePoolFactory(STABLE_POOL_ADDRESS);
+        PromotionalPoolFactory tmpPromotionalPoolFactory = new PromotionalPoolFactory{salt: PROMOTIONAL_POOL_SALT}(address(tokenMasterRouter));
+        vm.etch(PROMO_POOL_ADDRESS, address(tmpPromotionalPoolFactory).code);
+        promotionalPoolFactory = PromotionalPoolFactory(PROMO_POOL_ADDRESS);
         vm.stopPrank();
 
         assertEq(address(standardPoolFactory), initialAllowedFactories[0]);
@@ -101,11 +97,8 @@ contract TokenMasterTest is Test {
         ROUTER_DOMAIN_SEPARATOR = _getTokenMasterRouterDomainSeparator();
 
         vm.startPrank(TRANSFER_VALIDATOR_ADMIN);
-        address[] memory whitelistAccounts = new address[](4);
+        address[] memory whitelistAccounts = new address[](1);
         whitelistAccounts[0] = address(tokenMasterRouter);
-        whitelistAccounts[1] = address(standardPoolFactory);
-        whitelistAccounts[2] = address(stablePoolFactory);
-        whitelistAccounts[3] = address(promotionalPoolFactory);
         transferValidator.addAccountsToWhitelist(0, whitelistAccounts);
         vm.stopPrank();
 
@@ -115,57 +108,6 @@ contract TokenMasterTest is Test {
         tokenMasterRouter.setAllowedTokenFactory(address(stablePoolFactory), true);
         tokenMasterRouter.setAllowedTokenFactory(address(promotionalPoolFactory), true);
         vm.stopPrank();
-    }
-
-    function _computeRouterAddress() internal view returns (address _router) {
-        bytes32 initCodeHash = keccak256(
-            bytes.concat(
-                type(TokenMasterRouter).creationCode,
-                abi.encode(
-                    address(roleServer),
-                    roleSet,
-                    address(trustedForwarderFactory)
-                )
-            )
-        );
-
-        address deployer = KEYLESS_DEPLOYER;
-        bytes32 salt = ROUTER_SALT;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(0x40, add(ptr, 0x60))
-            mstore8(ptr, 0xff)
-            mstore(add(ptr, 0x01), shl(0x60, deployer))
-            mstore(add(ptr, 0x15), salt)
-            mstore(add(ptr, 0x35), initCodeHash)
-            _router := shr(0x60, shl(0x60, keccak256(ptr, 0x55)))
-        }
-    }
-
-    function _computeFactoryAddress(
-        bytes memory creationCode,
-        address _tokenMasterRouter,
-        bytes32 salt
-    ) internal pure returns (address _factory) {
-        bytes32 initCodeHash = keccak256(
-            bytes.concat(
-                creationCode,
-                abi.encode(
-                    _tokenMasterRouter
-                )
-            )
-        );
-
-        address deployer = KEYLESS_DEPLOYER;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(0x40, add(ptr, 0x60))
-            mstore8(ptr, 0xff)
-            mstore(add(ptr, 0x01), shl(0x60, deployer))
-            mstore(add(ptr, 0x15), salt)
-            mstore(add(ptr, 0x35), initCodeHash)
-            _factory := shr(0x60, shl(0x60, keccak256(ptr, 0x55)))
-        }
     }
 
     function _signDeploymentParameters(
