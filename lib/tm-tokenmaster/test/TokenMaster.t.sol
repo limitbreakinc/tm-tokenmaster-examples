@@ -62,11 +62,14 @@ contract TokenMasterTest is Test {
         vm.stopPrank();
 
         vm.startPrank(KEYLESS_DEPLOYER);
+        uint256 currentChainId = block.chainid;
+        vm.chainId(currentChainId + 1); // switch chainId to force update on EIP712
         TokenMasterRouter tmpTokenMasterRouter = new TokenMasterRouter(
             address(roleServer),
             roleSet,
             address(trustedForwarderFactory)
         );
+        vm.chainId(currentChainId);
         vm.etch(TOKENMASTER_ROUTER_ADDRESS, address(tmpTokenMasterRouter).code);
         tokenMasterRouter = TokenMasterRouter(TOKENMASTER_ROUTER_ADDRESS);
         console.log("TokenMasterRouter: %s", address(tokenMasterRouter));

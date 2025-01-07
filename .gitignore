@@ -13,3 +13,4 @@ docs/
 # Dotenv file
 .env
 lib/tm-tokenmaster/.DS_Store
+lib/.DS_Store

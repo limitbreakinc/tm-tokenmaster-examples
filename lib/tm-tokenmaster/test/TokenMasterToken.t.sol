@@ -3,8 +3,6 @@ pragma solidity ^0.8.13;
 
 
 import "./TokenMaster.t.sol";
-import "src/pools/promotional-pool/DataTypes.sol";
-import "src/pools/standard-token-pool/DataTypes.sol";
 import "src/interfaces/ITokenMasterRouter.sol";
 import "@limitbreak/permit-c/interfaces/IPermitC.sol";
 
