@@ -5,7 +5,7 @@ import "@limitbreak/tm-core-lib/src/token/erc721/ERC721C.sol";
 import "@limitbreak/tokenmaster/src/interfaces/ITokenMasterBuyHook.sol";
 import "@limitbreak/tokenmaster/src/interfaces/IMinterBurnerRolePool.sol";
 
-contract MockBuyHookPromoPool is ITokenMasterBuyHook {
+contract HookBuyMintsPromoToken is ITokenMasterBuyHook {
 
     address private immutable TOKEN_MASTER_ROUTER;
     address private immutable TOKEN_MASTER_TOKEN;

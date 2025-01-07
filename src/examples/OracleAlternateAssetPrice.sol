@@ -3,7 +3,7 @@ pragma solidity 0.8.24;
 
 import "@limitbreak/tokenmaster/src/interfaces/ITokenMasterOracle.sol";
 
-contract MockOracle is ITokenMasterOracle {
+contract OracleAlternateAssetPrice is ITokenMasterOracle {
 
     struct Adjust {
         uint256 numerator;

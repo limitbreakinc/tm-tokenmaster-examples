@@ -4,7 +4,7 @@ pragma solidity 0.8.24;
 import "@limitbreak/tm-core-lib/src/token/erc721/ERC721C.sol";
 import "@limitbreak/tokenmaster/src/interfaces/ITokenMasterSpendHook.sol";
 
-contract MockSpendHookERC721C is ERC721C, ITokenMasterSpendHook {
+contract HookSpendMintsERC721C is ERC721C, ITokenMasterSpendHook {
 
     uint256 private nextTokenId;
     address private immutable TOKEN_MASTER_ROUTER;

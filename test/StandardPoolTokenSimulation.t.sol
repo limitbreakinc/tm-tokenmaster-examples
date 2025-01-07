@@ -21,7 +21,7 @@ contract StandardPoolTokenSimulationTest is TokenMasterTokenTest {
     function setUp() public virtual override {
         super.setUp();
     }
-    
+
     uint16 constant BUY_FEE_BPS = 10;
     uint16 constant SELL_FEE_BPS = 10;
     uint16 constant BUY_SPREAD_BPS = 15;
@@ -274,7 +274,7 @@ contract StandardPoolTokenSimulationTest is TokenMasterTokenTest {
         console.log("Created %s users", userCount);
     }
 
-    function _logDivision(string memory message, uint256 numerator, uint256 denominator) private {
+    function _logDivision(string memory message, uint256 numerator, uint256 denominator) private pure {
         // Scale numerator for precision
         uint256 scaledNumerator = numerator * 1e18; // Adjust precision by 18 decimals
         uint256 result = scaledNumerator / denominator;
@@ -282,7 +282,7 @@ contract StandardPoolTokenSimulationTest is TokenMasterTokenTest {
         logDecimals(message, result, 18);
     }
 
-    function _logDivisionPercentage(string memory message, uint256 numerator, uint256 denominator) private {
+    function _logDivisionPercentage(string memory message, uint256 numerator, uint256 denominator) private pure {
         // Scale numerator for precision
         uint256 scaledNumerator = numerator * 1e18; // Adjust precision by 18 decimals
         uint256 result = scaledNumerator / denominator;
