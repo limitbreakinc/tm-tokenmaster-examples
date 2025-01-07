@@ -11,7 +11,8 @@ import "@limitbreak/tokenmaster/test/mocks/MockPairedTokenERC20.sol";
 import "./helpers/Random.sol";
 import "./helpers/AddressSet.sol";
 
-
+// Executes a simulation of buys and spends for a Standard Pool Token using
+// defined fee, spread, creator share, and spend cost values.
 contract StandardPoolTokenSimulationTest is TokenMasterTokenTest {
     using LibAddressSet for AddressSet;
     
