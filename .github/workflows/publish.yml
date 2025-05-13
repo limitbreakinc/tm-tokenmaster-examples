@@ -1,0 +1,42 @@
+name: Release Code to Public Repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name to push'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  squash_commits:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: 'true'
+        
+    - name: Setup SSH Agent
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        ssh-add - <<< "${{ secrets.PUBLIC_REPO_SSH_KEY }}"
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
+        
+    - name: Squash & Push Code to Public Repo
+      run: |
+        current_date=$(date '+%Y%m%d')
+        git switch "${{ github.event.inputs.tag }}" --detach
+        git switch -c "$GITHUB_REF_NAME-$current_date"
+        git config --global user.email "no-reply@limitbreak.com"
+        git config --global user.name "Limit Break Inc"
+        git reset $(git commit-tree HEAD^{tree} -m "Code Release from $GITHUB_REF_NAME-$current_date")
+        git remote add public-repo git@github.com:limitbreakinc/tm-tokenmaster-examples.git
+        git push -f public-repo "$GITHUB_REF_NAME-$current_date"
+        git push public-repo "${{ github.event.inputs.tag }}"
