@@ -6,7 +6,6 @@ import "@limitbreak/tokenmaster/src/interfaces/ITokenMasterBuyHook.sol";
 import "@limitbreak/tokenmaster/src/interfaces/IMinterBurnerRolePool.sol";
 
 contract HookBuyMintsPromoToken is ITokenMasterBuyHook {
-
     address private immutable TOKEN_MASTER_ROUTER;
     address private immutable TOKEN_MASTER_TOKEN;
     bytes32 private immutable CREATOR_BUY_IDENTIFIER;
@@ -31,7 +30,11 @@ contract HookBuyMintsPromoToken is ITokenMasterBuyHook {
         uint256 amountPurchased,
         bytes calldata //hookExtraData
     ) external {
-        if (!(tokenMasterToken == TOKEN_MASTER_TOKEN && creatorBuyIdentifier == CREATOR_BUY_IDENTIFIER && msg.sender == TOKEN_MASTER_ROUTER)) {
+        if (
+            !(tokenMasterToken == TOKEN_MASTER_TOKEN &&
+                creatorBuyIdentifier == CREATOR_BUY_IDENTIFIER &&
+                msg.sender == TOKEN_MASTER_ROUTER)
+        ) {
             revert();
         }
         PROMO_POOL.mint(buyer, amountPurchased);
